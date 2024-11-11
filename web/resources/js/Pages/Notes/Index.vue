@@ -19,8 +19,10 @@
             <!-- Notes List -->
             <div class="space-y-4">
                 <div v-for="note in notes" :key="note.id"
-                    class="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+                    class="p-8 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
                     <h3 class="text-xl font-semibold text-gray-700">{{ note . title }}</h3>
+                    <hr>
+                    <br>
                     <div class="markdown-content" v-html="renderMarkdown(note.content)"></div>
                     <div class="mt-4 flex justify-end gap-2">
                         <button @click="editNote(note)"
