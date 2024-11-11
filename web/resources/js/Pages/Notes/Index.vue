@@ -16,11 +16,18 @@
                 </button>
             </div>
 
+            <!-- Search Bar for Filtering Notes -->
+            <div class="mb-6">
+                <input type="text" v-model="searchQuery" placeholder="Search by title"
+                    class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+
             <!-- Notes List -->
             <div class="space-y-4">
-                <div v-for="note in notes" :key="note.id"
+                <div v-for="note in filteredNotes" :key="note.id"
                     class="p-8 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-xl font-semibold text-gray-700">{{ note . title }}</h3>
+                    <h3 class="text-xl font-semibold text-gray-700">{{ note.title }}</h3>
                     <hr>
                     <br>
                     <div class="markdown-content" v-html="renderMarkdown(note.content)"></div>
@@ -41,7 +48,7 @@
             <div v-if="modalVisible" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
                 <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-                        {{ currentNote . id ? 'Edit Note' : 'Create Note' }}</h2>
+                        {{ currentNote.id ? 'Edit Note' : 'Create Note' }}</h2>
                     <input v-model="currentNote.title" placeholder="Title"
                         class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <textarea v-model="currentNote.content" placeholder="Content"
@@ -63,92 +70,97 @@
 </template>
 
 <script>
-    import {
-        marked
-    } from 'marked'; // Correct import for the marked function
-    import axios from 'axios';
-    import {
-        ref
-    } from 'vue';
+import { marked } from 'marked';
+import axios from 'axios';
+import { ref, computed } from 'vue';
 
-    export default {
-        props: {
-            notes: Array,
-        },
-        setup(props) {
-            const notes = ref(props.notes);
-            const modalVisible = ref(false);
-            const currentNote = ref({
+export default {
+    props: {
+        notes: Array,
+    },
+    setup(props) {
+        const notes = ref(props.notes);
+        const modalVisible = ref(false);
+        const currentNote = ref({
+            title: '',
+            content: ''
+        });
+        const currentNoteId = ref(null);
+        const searchQuery = ref(''); // Search query for filtering notes
+
+        const createNote = () => {
+            currentNote.value = {
                 title: '',
                 content: ''
-            });
-            const currentNoteId = ref(null);
-
-            const createNote = () => {
-                currentNote.value = {
-                    title: '',
-                    content: ''
-                };
-                modalVisible.value = true;
             };
+            modalVisible.value = true;
+        };
 
-            const editNote = (note) => {
-                currentNote.value = {
-                    ...note
-                };
-                currentNoteId.value = note.id;
-                modalVisible.value = true;
+        const editNote = (note) => {
+            currentNote.value = {
+                ...note
             };
+            currentNoteId.value = note.id;
+            modalVisible.value = true;
+        };
 
-            const saveNote = () => {
-                const method = currentNoteId.value ? 'put' : 'post';
-                const url = currentNoteId.value ? `/notes/${currentNoteId.value}` : '/notes';
-                axios[method](url, currentNote.value)
-                    .then(() => {
-                        modalVisible.value = false;
-                        // Reload notes list
-                        axios.get('/notes').then((response) => {
-                            notes.value = response.data.notes;
-                            window.location.reload();
-                        });
-                        window.location.reload();
-                    });
-            };
-
-            const deleteNote = (id) => {
-                axios.delete(`/notes/${id}`).then(() => {
-                    // Reload notes list
+        const saveNote = () => {
+            const method = currentNoteId.value ? 'put' : 'post';
+            const url = currentNoteId.value ? `/notes/${currentNoteId.value}` : '/notes';
+            axios[method](url, currentNote.value)
+                .then(() => {
+                    modalVisible.value = false;
                     axios.get('/notes').then((response) => {
                         notes.value = response.data.notes;
                         window.location.reload();
                     });
                     window.location.reload();
                 });
-            };
+        };
 
-            const logout = () => {
-                localStorage.removeItem('authToken'); // If you store the token in localStorage
-                window.location.href = '/logout'; // Redirect to login page
-            };
+        const deleteNote = (id) => {
+            axios.delete(`/notes/${id}`).then(() => {
+                axios.get('/notes').then((response) => {
+                    notes.value = response.data.notes;
+                    window.location.reload();
+                });
+                window.location.reload();
+            });
+        };
 
-            // Render markdown content
-            const renderMarkdown = (content) => {
-                return marked(content); // Convert markdown to HTML
-            };
+        const logout = () => {
+            localStorage.removeItem('authToken');
+            window.location.href = '/logout';
+        };
 
-            return {
-                notes,
-                modalVisible,
-                currentNote,
-                createNote,
-                editNote,
-                saveNote,
-                deleteNote,
-                logout,
-                renderMarkdown // Expose the renderMarkdown function
-            };
-        },
-    };
+        // Render markdown content
+        const renderMarkdown = (content) => {
+            return marked(content);
+        };
+
+        // Computed property to filter notes based on the search query
+        const filteredNotes = computed(() => {
+            if (!searchQuery.value) {
+                return notes.value;
+            }
+            return notes.value.filter(note => note.title.toLowerCase().includes(searchQuery.value.toLowerCase()));
+        });
+
+        return {
+            notes,
+            modalVisible,
+            currentNote,
+            createNote,
+            editNote,
+            saveNote,
+            deleteNote,
+            logout,
+            renderMarkdown,
+            searchQuery,
+            filteredNotes, // Expose the filteredNotes property
+        };
+    },
+};
 </script>
 
 <style>
