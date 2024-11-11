@@ -1,5 +1,5 @@
 <template>
-    <div class="m-0 p-0" style="background-color: #dddddd;">
+    <div class="m-0 p-0 bg-gray-100">
         <div class="container mx-auto p-4 bg-transparent" style="padding-top: 100px;">
             <!-- Logout Button (Top Left) -->
             <button @click="logout"
