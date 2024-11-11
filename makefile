@@ -42,6 +42,7 @@ composer-migrate-fresh:
 
 composer-seed:
 	${DOCKER_COMPOSE} run --build --rm artisan db:seed
+	${DOCKER_COMPOSE} run --build --rm artisan db:seed --class=NoteSeeder
 	
 composer-key-generate:
 	${DOCKER_COMPOSE} run --build --rm artisan key:generate
