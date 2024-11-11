@@ -1,6 +1,6 @@
 include mysql/mysql.env
 
-DOCKER_COMPOSE=docker-compose  # Change to use docker-compose
+DOCKER_COMPOSE=docker compose  # Change to use docker-compose
 
 DB_CONNECTION=mysql
 DB_HOST=mysql
