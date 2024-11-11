@@ -1,22 +1,77 @@
 <template>
-    <div>
-      <h1>Your Notes</h1>
-      <button @click="createNote" class="btn btn-primary">Create Note</button>
-      <div v-for="note in notes" :key="note.id" class="note-item">
-        <h3>{{ note.title }}</h3>
-        <p>{{ note.content }}</p>
-        <button @click="editNote(note)" class="btn btn-secondary">Edit</button>
-        <button @click="deleteNote(note.id)" class="btn btn-danger">Delete</button>
-      </div>
+<div class="container mx-auto p-4">
+  <!-- Title and Button for Creating Notes -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-semibold text-gray-800">Your Notes</h1>
+    <button
+      @click="createNote"
+      class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    >
+      Create Note
+    </button>
+  </div>
 
-      <!-- Modal for creating/updating notes -->
-      <div v-if="modalVisible" class="modal">
-        <input v-model="currentNote.title" placeholder="Title" />
-        <textarea v-model="currentNote.content" placeholder="Content"></textarea>
-        <button @click="saveNote" class="btn btn-primary">Save</button>
-        <button @click="modalVisible = false" class="btn btn-secondary">Cancel</button>
+  <!-- Notes List -->
+  <div class="space-y-4">
+    <div
+      v-for="note in notes"
+      :key="note.id"
+      class="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+    >
+      <h3 class="text-xl font-semibold text-gray-700">{{ note.title }}</h3>
+      <p class="text-gray-600 mt-2">{{ note.content }}</p>
+      <div class="mt-4 flex justify-end gap-2">
+        <button
+          @click="editNote(note)"
+          class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        >
+          Edit
+        </button>
+        <button
+          @click="deleteNote(note.id)"
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+        >
+          Delete
+        </button>
       </div>
     </div>
+  </div>
+
+  <!-- Modal for Creating/Updating Notes -->
+  <div
+    v-if="modalVisible"
+    class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50"
+  >
+    <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ currentNote.id ? 'Edit Note' : 'Create Note' }}</h2>
+      <input
+        v-model="currentNote.title"
+        placeholder="Title"
+        class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <textarea
+        v-model="currentNote.content"
+        placeholder="Content"
+        class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+      ></textarea>
+      <div class="flex justify-end gap-2">
+        <button
+          @click="saveNote"
+          class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          Save
+        </button>
+        <button
+          @click="modalVisible = false"
+          class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
   </template>
 
   <script>
