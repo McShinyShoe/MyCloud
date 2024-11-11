@@ -20,7 +20,7 @@
             <div class="space-y-4">
                 <div v-for="note in notes" :key="note.id"
                     class="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <h3 class="text-xl font-semibold text-gray-700">{{ note.title }}</h3>
+                    <h3 class="text-xl font-semibold text-gray-700">{{ note . title }}</h3>
                     <div class="markdown-content" v-html="renderMarkdown(note.content)"></div>
                     <div class="mt-4 flex justify-end gap-2">
                         <button @click="editNote(note)"
@@ -38,7 +38,8 @@
             <!-- Modal for Creating/Updating Notes -->
             <div v-if="modalVisible" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
                 <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{ currentNote.id ? 'Edit Note' : 'Create Note' }}</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                        {{ currentNote . id ? 'Edit Note' : 'Create Note' }}</h2>
                     <input v-model="currentNote.title" placeholder="Title"
                         class="w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <textarea v-model="currentNote.content" placeholder="Content"
@@ -60,82 +61,88 @@
 </template>
 
 <script>
-import { marked } from 'marked';  // Correct import for the marked function
-import axios from 'axios';
-import { ref } from 'vue';
+    import {
+        marked
+    } from 'marked'; // Correct import for the marked function
+    import axios from 'axios';
+    import {
+        ref
+    } from 'vue';
 
-export default {
-    props: {
-        notes: Array,
-    },
-    setup(props) {
-        const notes = ref(props.notes);
-        const modalVisible = ref(false);
-        const currentNote = ref({
-            title: '',
-            content: ''
-        });
-        const currentNoteId = ref(null);
-
-        const createNote = () => {
-            currentNote.value = {
+    export default {
+        props: {
+            notes: Array,
+        },
+        setup(props) {
+            const notes = ref(props.notes);
+            const modalVisible = ref(false);
+            const currentNote = ref({
                 title: '',
                 content: ''
+            });
+            const currentNoteId = ref(null);
+
+            const createNote = () => {
+                currentNote.value = {
+                    title: '',
+                    content: ''
+                };
+                modalVisible.value = true;
             };
-            modalVisible.value = true;
-        };
 
-        const editNote = (note) => {
-            currentNote.value = { ...note };
-            currentNoteId.value = note.id;
-            modalVisible.value = true;
-        };
+            const editNote = (note) => {
+                currentNote.value = {
+                    ...note
+                };
+                currentNoteId.value = note.id;
+                modalVisible.value = true;
+            };
 
-        const saveNote = () => {
-            const method = currentNoteId.value ? 'put' : 'post';
-            const url = currentNoteId.value ? `/notes/${currentNoteId.value}` : '/notes';
-            axios[method](url, currentNote.value)
-                .then(() => {
-                    modalVisible.value = false;
+            const saveNote = () => {
+                const method = currentNoteId.value ? 'put' : 'post';
+                const url = currentNoteId.value ? `/notes/${currentNoteId.value}` : '/notes';
+                axios[method](url, currentNote.value)
+                    .then(() => {
+                        modalVisible.value = false;
+                        // Reload notes list
+                        axios.get('/notes').then((response) => {
+                            notes.value = response.data.notes;
+                        });
+                    });
+            };
+
+            const deleteNote = (id) => {
+                axios.delete(`/notes/${id}`).then(() => {
                     // Reload notes list
                     axios.get('/notes').then((response) => {
                         notes.value = response.data.notes;
                     });
                 });
-        };
+            };
 
-        const deleteNote = (id) => {
-            axios.delete(`/notes/${id}`).then(() => {
-                // Reload notes list
-                axios.get('/notes').then((response) => {
-                    notes.value = response.data.notes;
-                });
-            });
-        };
+            const logout = () => {
+                localStorage.removeItem('authToken'); // If you store the token in localStorage
+                window.location.href = '/logout'; // Redirect to login page
+            };
 
-        const logout = () => {
-            localStorage.removeItem('authToken'); // If you store the token in localStorage
-            window.location.href = '/logout'; // Redirect to login page
-        };
+            // Render markdown content
+            const renderMarkdown = (content) => {
+                return marked(content); // Convert markdown to HTML
+            };
 
-        // Render markdown content
-        const renderMarkdown = (content) => {
-            return marked(content);  // Convert markdown to HTML
-        };
-
-        return {
-            notes,
-            modalVisible,
-            currentNote,
-            createNote,
-            editNote,
-            saveNote,
-            deleteNote,
-            logout,
-            renderMarkdown  // Expose the renderMarkdown function
-        };
-    },
-};
+            return {
+                notes,
+                modalVisible,
+                currentNote,
+                createNote,
+                editNote,
+                saveNote,
+                deleteNote,
+                logout,
+                renderMarkdown // Expose the renderMarkdown function
+            };
+        },
+    };
 </script>
 
 <style>
