@@ -109,7 +109,9 @@
                         // Reload notes list
                         axios.get('/notes').then((response) => {
                             notes.value = response.data.notes;
+                            window.location.reload();
                         });
+                        window.location.reload();
                     });
             };
 
@@ -118,7 +120,9 @@
                     // Reload notes list
                     axios.get('/notes').then((response) => {
                         notes.value = response.data.notes;
+                        window.location.reload();
                     });
+                    window.location.reload();
                 });
             };
 
